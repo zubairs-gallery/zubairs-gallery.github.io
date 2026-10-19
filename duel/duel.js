@@ -12,6 +12,11 @@
   var MAX_MOVES = 2000;
   var MOVE_BYTE_MAX = 191;
   var MAX_CODE_SCORE = 1048575;
+  var MAX_NAME_POINTS = 16;
+  var FRIEND_NAME = 'A friend';
+  // Same characters as src/duel/nickname.ts: C0/C1 controls, U+2028/U+2029, zero-width and direction
+  // marks, bidi embeddings, overrides and isolates, invisible operators and the BOM.
+  var CONTROL = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028\u2029\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]/g;
 
   // 32-bit multiply without Math.imul.
   function mul32(a, b) {
@@ -161,6 +166,24 @@
   }
 
   /*
+   * A name held to the app's nickname rules (sanitizeNickname): the characters above removed, trimmed,
+   * at most 16 code points. One that cleans to nothing reads as "A friend", as in the app.
+   */
+  function cleanName(name) {
+    var s = name.replace(CONTROL, '').trim();
+    var out = '';
+    var points = 0;
+    for (var i = 0; i < s.length && points < MAX_NAME_POINTS; i++) {
+      var c = s.charCodeAt(i);
+      out += s.charAt(i);
+      if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) out += s.charAt(++i);
+      points++;
+    }
+    out = out.trim();
+    return out === '' ? FRIEND_NAME : out;
+  }
+
+  /*
    * hash is location.hash, for example "#d=AQEA...". Returns { name, score, code } or null; never throws.
    * For a challenge link that is the challenger; for a reply link it is the player who sent the reply.
    */
@@ -187,13 +210,23 @@
         if (!sender) return null;
       }
       if (r.pos !== r.end) return null;
-      return { name: sender.name, score: sender.score, code: buildCode(seed, sender.score, rulesVersion) };
+      return { name: cleanName(sender.name), score: sender.score, code: buildCode(seed, sender.score, rulesVersion) };
     } catch (e) {
       return null;
     }
   }
 
-  var api = { readChallenge: readChallenge };
+  /*
+   * The same link for the installed app: lagoonblock://duel#d=<the same payload>, so the app reads the
+   * moves and can verify the score. null unless the fragment holds a readable duel.
+   */
+  function appLink(hash) {
+    if (!readChallenge(hash)) return null;
+    var text = hash.charAt(0) === '#' ? hash.slice(1) : hash;
+    return 'lagoonblock://duel#d=' + text.slice(2);
+  }
+
+  var api = { readChallenge: readChallenge, appLink: appLink };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (root) root.LagoonDuel = api;
 })(typeof window !== 'undefined' ? window : null);
