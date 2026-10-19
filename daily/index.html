@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lagoon Block Daily</title>
+  <meta name="description" content="A new Lagoon Block puzzle every day. Everyone gets the same pieces.">
+  <meta name="theme-color" content="#0E3B43">
+  <style>
+    :root { --bg: #0E3B43; --text: #FFFFFF; --accent: #CFF5EE; --button: #17545E; }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 1.0625rem; line-height: 1.6; }
+    main { max-width: 42rem; margin: 0 auto; padding: 2.5rem 1rem 3rem; text-align: center; }
+    h1 { color: var(--accent); font-size: 2rem; line-height: 1.25; margin: 0 0 0.75rem; overflow-wrap: anywhere; }
+    p { margin: 0.5rem 0; }
+    .lead { font-size: 1.2rem; }
+    .code { display: inline-block; margin-top: 0.25rem; padding: 0.25rem 0.75rem; background: var(--button); border-radius: 0.5rem; font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 600; letter-spacing: 0.04em; }
+    .button { display: inline-block; min-height: 44px; padding: 0.65rem 1.25rem; margin-top: 1.25rem; background: var(--button); color: var(--text); border: 2px solid var(--accent); border-radius: 0.75rem; text-decoration: none; font-weight: 600; }
+    .button:hover { background: var(--accent); color: var(--bg); }
+    a { color: var(--accent); }
+    a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .hint { opacity: 0.85; }
+    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--button); font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="headline">Lagoon Block Daily Puzzle</h1>
+    <p class="lead">A new puzzle every day. Everyone gets the same pieces.</p>
+    <a class="button" href="https://play.google.com/store/apps/details?id=com.xubair.lagoonblock">Get it on Google Play</a>
+  </main>
+  <script>
+    (function () {
+      // Same epoch math as src/daily/daily.ts: puzzle #1 is 2026-11-02, counted in local calendar dates.
+      var now = new Date();
+      var days = Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(2026, 10, 2)) / 86400000);
+      var n = days + 1;
+      if (n < 1) return;
+      document.getElementById('headline').textContent = 'Daily Puzzle #' + n;
+      document.title = 'Lagoon Block Daily Puzzle #' + n;
+    })();
+  </script>
+</body>
+</html>
